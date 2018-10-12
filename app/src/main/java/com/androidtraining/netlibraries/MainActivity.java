@@ -5,6 +5,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.androidtraining.netlibraries.models.Example;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 
 import okhttp3.Call;
@@ -31,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         Request request = new Request.Builder()
-                .url("https://www.google.com")
+                .url("https://randomuser.me/api")
                 .build();
 
         okHttpClient.newCall(request).enqueue(new Callback() {
@@ -44,9 +50,18 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if(response.isSuccessful()){ // 200 OK
+                if (response.isSuccessful()) { // 200 OK
                     final String result = response.body().string();
 
+//                    try {
+//                        JSONObject respObject = new JSONObject(result);
+//                        JSONObject infoObject = respObject .getJSONObject("info");
+//                        String seed = infoObject.getString("seed");
+//                        Log.d(TAG, "onResponse: result " + seed);
+                    Gson gson = new Gson();
+                    Example myUserResponse = gson.fromJson(result, Example.class);
+
+                    Log.d(TAG, "onResponse: seed " + myUserResponse.getInfo().getSeed());
                     Log.d(TAG, "onResponse: result " + result);
 
                     runOnUiThread(new Runnable() {
@@ -55,8 +70,11 @@ public class MainActivity extends AppCompatActivity {
                             resultTV.setText(result);
                         }
                     });
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
 
-                }else{
+                } else {
                     // error state -> 500, 401, 402, etc...
                     //retry
                     Log.d(TAG, "onResponse: Error" + response.code());
